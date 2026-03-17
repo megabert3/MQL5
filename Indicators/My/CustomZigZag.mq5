@@ -35,6 +35,11 @@ int candidateIndex;
 double lastExtrenePrice;
 int lastExtremeIndex;
 
+double legStartPrice;
+int legStartIndex;
+double legEndPrice;
+int legEndIndex;
+
 SearchMod search;
 
 //+------------------------------------------------------------------+
@@ -56,6 +61,10 @@ int OnInit()
     candidatePrice = 0.0;
     lastExtremeIndex = 0;
     lastExtrenePrice = 0.0;
+    legStartPrice = 0.0;
+    legStartIndex = 0;
+    legEndPrice = 0.0;
+    legEndIndex = 0;
     search = NONE;
 //---
    return(INIT_SUCCEEDED);
@@ -75,7 +84,6 @@ int OnCalculate(const int32_t rates_total,
                 const int32_t &spread[])
   {
 //---
-    if (candidateIndex >= rates_total) return rates_total;
     if (rates_total < 2) return 0;
 
     if (prev_calculated == 0) {
@@ -85,12 +93,15 @@ int OnCalculate(const int32_t rates_total,
       candidateIndex = 0;
       lastExtrenePrice = 0.0;
       lastExtremeIndex = 0;
+      legStartPrice = 0.0;
+      legStartIndex = 0;
+      legEndPrice = 0.0;
+      legEndIndex = 0;
       search = NONE;
     }
 
     int start = prev_calculated > 0 ? prev_calculated - 1 : 0;
     for (int i = start; i < rates_total; i++) {
-      legBuffer[i] = 0.0;
 
       if (search == NONE) {
         if (candidatePrice == 0.0) {
@@ -107,66 +118,128 @@ int OnCalculate(const int32_t rates_total,
           lastExtremeIndex = candidateIndex;
           candidatePrice = high[i];
           candidateIndex = i;
+          legStartIndex = i;
+          legStartPrice = high[i];
+          legBuffer[legStartIndex] = legStartPrice;
           zigZagBuffer[i] = high[i];
           search = BOTTOM;
+          printComment();
 
         } else if (downDev) {
           lastExtrenePrice = candidatePrice;
           lastExtremeIndex = candidateIndex;
           candidatePrice = low[i];
           candidateIndex = i;
+          legStartIndex = i;
+          legStartPrice = low[i];
+          legBuffer[legEndIndex] = legStartPrice;
           zigZagBuffer[i] = low[i];
           search = TOP;
+          printComment();
         }
 
       } else if (search == BOTTOM) {
         if (candidatePrice < high[i]) {
+          Print("Ищем BOTTOM обновили High");
           zigZagBuffer[candidateIndex] = 0.0;
+          legBuffer[legEndIndex] = 0.0;
+          legBuffer[legStartIndex] = 0.0;
           candidatePrice = high[i];
           candidateIndex = i;
+          legStartPrice = high[i];
+          legStartIndex = i;
+          legEndPrice = high[i];
+          legEndIndex = i;
+          legBuffer[legStartIndex] = legStartPrice;
           zigZagBuffer[candidateIndex] = candidatePrice;
+          printComment();
         }
 
         if (candidatePrice - low[i] > deviation * _Point) {
+          Print("Нашли BOTTOM теперь ищем TOP");
+          legBuffer[legEndIndex] = 0.0;
+          legBuffer[legStartIndex] = 0.0;
           lastExtrenePrice = candidatePrice;
           lastExtremeIndex = candidateIndex;
           candidatePrice = low[i];
           candidateIndex = i;
+          legStartIndex = i;
+          legStartPrice = low[i];
+          legEndIndex = i;
+          legEndPrice = low[i];
+          legBuffer[legStartIndex] = legStartPrice;
           zigZagBuffer[lastExtremeIndex] = lastExtrenePrice;
-          legBuffer[lastExtremeIndex] = 0.0;
           search = TOP;
+          printComment();
         }
       } else if (search == TOP) {
         if (candidatePrice > low[i]) {
+          Print("Ищем TOP обновили low");
           zigZagBuffer[candidateIndex] = 0.0;
+          legBuffer[legEndIndex] = 0.0;
+          legBuffer[legStartIndex] = 0.0;
           candidatePrice = low[i];
           candidateIndex = i;
+          legStartPrice = low[i];
+          legStartIndex = i;
+          legEndPrice = low[i];
+          legEndIndex = i;
+          legBuffer[legStartIndex] = legStartPrice;
           zigZagBuffer[candidateIndex] = candidatePrice;
+          printComment();
         }
 
         if (high[i] - candidatePrice > deviation * _Point) {
+          Print("Нашли TOP теперь ищем BOTTOM");
+          legBuffer[legEndIndex] = 0.0;
+          legBuffer[legStartIndex] = 0.0;
           lastExtrenePrice = candidatePrice;
           lastExtremeIndex = candidateIndex;
           candidatePrice = high[i];
           candidateIndex = i;
+          legStartIndex = i;
+          legStartPrice = high[i];
+          legEndIndex = i;
+          legEndPrice = high[i];
+          legBuffer[legStartIndex] = legStartPrice;
           zigZagBuffer[lastExtremeIndex] = lastExtrenePrice;
-          legBuffer[lastExtremeIndex] = 0.0;
           search = BOTTOM;
+          printComment();
         }
       }
 
-      if (candidateIndex != i) {
-        if (search == BOTTOM) legBuffer[i] = low[i];
-        else if (search == TOP) legBuffer[i] = high[i];
-
-      } else {
-        legBuffer[i] = candidatePrice;
+      if (legStartIndex != i) {
+        if (search == BOTTOM) {
+          legEndIndex = i;
+          legEndPrice = low[i];
+        }
+        else if (search == TOP) {
+          legEndIndex = i;
+          legEndPrice = high[i]; 
+        }
+        legBuffer[legEndIndex] = legEndPrice;
       }
     }
 //--- return value of prev_calculated for next call
    return(rates_total);
   }
+
+  void printComment() {
+    Comment(getInfo());
+  }
   
+string getInfo() {
+  return 
+    "search: = " + EnumToString(search) + "\n" +
+    "candidatePrice: = " + candidatePrice + "\n" +
+    "candidateIndex: = " + candidateIndex + "\n" +
+    "lastExtrenePrice: = " + lastExtrenePrice + "\n" +
+    "lastExtremeIndex: = " + lastExtremeIndex + "\n" +
+    "legStartPrice: = " + legStartPrice + "\n" +
+    "legStartIndex: = " + legStartIndex + "\n" +
+    "legEndPrice: = " + legEndPrice + "\n" +
+    "legEndIndex: = " + legEndIndex;
+}
 //+------------------------------------------------------------------+
 //| Timer function                                                   |
 //+------------------------------------------------------------------+

@@ -18,4 +18,8 @@
 !Scripts/My
 !Scripts/My/**
 
+!Files
+!Files/My
+!Files/My/**
+
 !.gitignore

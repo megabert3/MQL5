@@ -23,3 +23,17 @@
 !Files/My/**
 
 !.gitignore
+
+!Information/
+!Information/**
+
+!Files/My/Claude
+!Files/My/Claude/**
+!CLAUDE.md
+!.claude/
+!.claude/CLAUDE.md
+!.claude/settings.json
+!.claude/skills/
+!.claude/skills/**
+!.claude/rules/
+!.claude/rules/**

@@ -31,14 +31,6 @@ class CAtr {
       m_calculatedBars = 0;
     }
 
-    // True Range одной свечи
-    static double trueRange(double high, double low, double prevClose) {
-      double hl = high - low;
-      double hc = MathAbs(high - prevClose);
-      double lc = MathAbs(low - prevClose);
-      return MathMax(hl, MathMax(hc, lc));
-    }
-
     // Рассчитать ATR для конкретного бара по массивам
     // Возвращает ATR или 0.0 если недостаточно данных
     double calculate(const double &high[],
@@ -74,17 +66,32 @@ class CAtr {
 
         // Досчитываем оставшиеся бары через Wilder smoothing
         for (int i = m_period; i <= index; i++) {
-          double tr = trueRange(high[i], low[i], close[i - 1]);
-          m_lastAtr = (m_lastAtr * (m_period - 1) + tr) / m_period;
-          m_calculatedBars = i + 1;
+          applyWilder(high, low, close, i);
         }
       } else {
         // Инкрементальный расчёт — Wilder smoothing
-        double tr = trueRange(high[index], low[index], close[index - 1]);
-        m_lastAtr = (m_lastAtr * (m_period - 1) + tr) / m_period;
-        m_calculatedBars = index + 1;
+        applyWilder(high, low, close, index);
       }
 
       return m_lastAtr;
+    }
+
+  private:
+    // True Range одной свечи
+    double trueRange(double high, double low, double prevClose) {
+      double hl = high - low;
+      double hc = MathAbs(high - prevClose);
+      double lc = MathAbs(low - prevClose);
+      return MathMax(hl, MathMax(hc, lc));
+    }
+
+    // Wilder smoothing: обновить ATR одним новым баром
+    void applyWilder(const double &high[],
+                     const double &low[],
+                     const double &close[],
+                     int index) {
+      double tr = trueRange(high[index], low[index], close[index - 1]);
+      m_lastAtr = (m_lastAtr * (m_period - 1) + tr) / m_period;
+      m_calculatedBars = index + 1;
     }
 };

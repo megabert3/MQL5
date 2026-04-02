@@ -2,7 +2,7 @@
 
 ## Обзор
 Проект алгоритмической торговли на MQL5 (MetaTrader 5) + Python (бэктестинг).
-Рынки: Forex, Crypto. Платформа работает через Wine на macOS.
+Рынки: Forex, Crypto.
 
 ## Структура проекта
 ```
@@ -23,17 +23,7 @@ python/         — Python-часть (бэктестинг, анализ) [пл
 - `Indicators/My/Claude/` — индикаторы
 - `Include/My/Claude/` — библиотечные классы
 - `Scripts/My/Claude/` — скрипты
-- `Files/My/Claude/` — классы данных (CAtr, CZigZagAdapt)
-
-### Подпапки Claude/
-Код, сгенерированный Claude, размещается в подпапках `My/Claude/` внутри соответствующих директорий:
-```
-Experts/My/Claude/     — торговые роботы
-Indicators/My/Claude/  — индикаторы
-Include/My/Claude/     — библиотечные классы
-Scripts/My/Claude/     — скрипты
-Files/My/Claude/       — классы данных
-```
+- `Files/My/Claude/` — классы данных
 
 ## Сборка и компиляция
 - Компиляция выполняется внутри MetaTrader 5 (MetaEditor), не из командной строки
@@ -47,9 +37,6 @@ Files/My/Claude/       — классы данных
 - Комментарии и отладочный вывод на русском языке допускаются
 
 ## Ключевые компоненты
-- **SeveralBars EA** (Experts/My/) — стратегия на паттерне из одноцветных свечей
-- **CZigZag** (Files/My/) — класс определения экстремумов цены (state machine)
-- **CustomZigZag** (Indicators/My/) — индикатор на основе CZigZag
 - **MqlTradeSync** (Include/My/Trade/) — синхронная обёртка торговых запросов
 - **TradeFilter/PositionFilter** — фильтрация сделок и позиций
 
@@ -59,7 +46,5 @@ Files/My/Claude/       — классы данных
 - Связь с MT5: через CSV-экспорт или API (ccxt для крипто, yfinance для Forex)
 
 ## Направление развития
-- Price Action: распознавание паттернов (двойное дно, H&S, треугольники) через ZigZag
-- Market Structure: BOS, CHoCH через экстремумы ZigZag
-- Уровни поддержки/сопротивления: кластеризация ZigZag-точек
+- Создание алгоритмических роботов разных классов, принципов работы и 'агрессивности' входа
 - Бэктестинг стратегий в Python

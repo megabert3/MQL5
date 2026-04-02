@@ -51,16 +51,11 @@ class CZigZagAdapt {
     State m_state;
 
     Extreme m_extremes[];
-    int m_extremeCount;
-    int m_maxExtremes;
 
   public:
-    CZigZagAdapt(int atrPeriod, double atrMultiplier, int maxExtremes = 10)
+    CZigZagAdapt(int atrPeriod, double atrMultiplier)
       : m_atr(atrPeriod) {
       m_atrMultiplier = atrMultiplier;
-      m_maxExtremes = maxExtremes;
-      m_extremeCount = 0;
-      ArrayResize(m_extremes, m_maxExtremes);
       m_state.reset();
     }
 
@@ -68,18 +63,18 @@ class CZigZagAdapt {
       ArrayInitialize(buff, 0.0);
       m_state.reset();
       m_atr.reset();
-      m_extremeCount = 0;
+      ArrayFree(m_extremes);
     }
 
     //--- Геттеры ---
 
-    int getExtremeCount() const { return m_extremeCount; }
+    int getExtremeCount() const { return ArraySize(m_extremes); }
 
-    // back=0 — последний, back=1 — предпоследний, ...
-    bool getExtreme(int back, Extreme &ext) const {
-      if (back < 0 || back >= m_extremeCount) return false;
-      ext = m_extremes[m_extremeCount - 1 - back];
-      return true;
+    void getExtremes(Extreme &dst[]) const {
+      int size = ArraySize(m_extremes);
+      ArrayResize(dst, size);
+      for (int i = 0; i < size; i++)
+        dst[i] = m_extremes[i];
     }
 
     SearchMode getCurrentSearch() const { return m_state.search; }
@@ -113,18 +108,12 @@ class CZigZagAdapt {
     }
 
   private:
-
     void pushExtreme(int index, double price, SearchMode type) {
-      if (m_extremeCount >= m_maxExtremes) {
-        for (int i = 0; i < m_maxExtremes - 1; i++) {
-          m_extremes[i] = m_extremes[i + 1];
-        }
-        m_extremeCount = m_maxExtremes - 1;
-      }
-      m_extremes[m_extremeCount].index = index;
-      m_extremes[m_extremeCount].price = price;
-      m_extremes[m_extremeCount].type = type;
-      m_extremeCount++;
+      int size = ArraySize(m_extremes);
+      ArrayResize(m_extremes, size + 1);
+      m_extremes[size].index = index;
+      m_extremes[size].price = price;
+      m_extremes[size].type = type;
     }
 
     void shiftCandidate(double &buff[], int newCndIndex, double newCndPrice, SearchMode mode) {

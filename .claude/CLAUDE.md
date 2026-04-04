@@ -45,6 +45,13 @@ python/         — Python-часть (бэктестинг, анализ) [пл
 - Библиотеки: pandas, numpy, vectorbt, matplotlib, jupyter
 - Связь с MT5: через CSV-экспорт или API (ccxt для крипто, yfinance для Forex)
 
+## Memory (контекст между сессиями)
+Файлы памяти хранятся в `.claude/memory/` — см. [MEMORY.md](.claude/memory/MEMORY.md).
+На новом компьютере после `git pull` скопировать содержимое в системную директорию Claude Code:
+```
+~/.claude/projects/<project-path>/memory/
+```
+
 ## Направление развития
 - Создание алгоритмических роботов разных классов, принципов работы и 'агрессивности' входа
 - Бэктестинг стратегий в Python

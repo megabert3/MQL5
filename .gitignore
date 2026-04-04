@@ -37,3 +37,5 @@
 !.claude/skills/**
 !.claude/rules/
 !.claude/rules/**
+!.claude/memory/
+!.claude/memory/**

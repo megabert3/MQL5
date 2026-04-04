@@ -1,0 +1,3 @@
+- [User Profile](user_profile.md) — Альберт, Java-dev, изучает алготрейдинг на MQL5+Python, Forex+Crypto
+- [Claude subdirs](feedback_claude_dirs.md) — код Claude в My/Claude/ по типу, переиспользуемые компоненты в отдельные классы
+- [File organization](feedback_file_organization.md) — код в My/Claude/, информация/ресурсы в Information/

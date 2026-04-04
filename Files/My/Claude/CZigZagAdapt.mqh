@@ -1,18 +1,15 @@
 //+------------------------------------------------------------------+
 //|                                                CZigZagAdapt.mqh  |
-//|                           Адаптивный ZigZag на основе ATR        |
+//|                           ZigZag с внешним deviation              |
 //|                           На базе CZigZag (Albert / akhalimov)   |
 //+------------------------------------------------------------------+
 #property copyright "akhalimov"
 #property version   "1.00"
 
-#include "CAtr.mqh"
-
 //+------------------------------------------------------------------+
-//| Адаптивный ZigZag                                                |
-//| Отличие от CZigZag: deviation = ATR × multiplier                 |
-//| На волатильном рынке фильтрует больше шума,                      |
-//| на спокойном — чувствительнее к разворотам.                       |
+//| ZigZag с внешним deviation                                       |
+//| deviation передаётся в calculate() извне — можно использовать    |
+//| ATR, фиксированное значение или любой другой источник.           |
 //| Хранит историю экстремумов для анализа паттернов.                |
 //+------------------------------------------------------------------+
 class CZigZagAdapt {
@@ -46,28 +43,21 @@ class CZigZagAdapt {
       }
     };
 
-    CAtr m_atr;
-    double m_atrMultiplier;
     State m_state;
-
     Extreme m_extremes[];
 
   public:
-    CZigZagAdapt(int atrPeriod, double atrMultiplier)
-      : m_atr(atrPeriod) {
-      m_atrMultiplier = atrMultiplier;
+    CZigZagAdapt() {
       m_state.reset();
     }
 
     void reset(double &buff[]) {
       ArrayInitialize(buff, 0.0);
       m_state.reset();
-      m_atr.reset();
       ArrayFree(m_extremes);
     }
 
     //--- Геттеры ---
-
     int getExtremeCount() const { return ArraySize(m_extremes); }
 
     void getExtremes(Extreme &dst[]) const {
@@ -80,8 +70,6 @@ class CZigZagAdapt {
     SearchMode getCurrentSearch() const { return m_state.search; }
     double getCandidatePrice() const { return m_state.candidatePrice; }
     int getCandidateIndex() const { return m_state.candidateIndex; }
-    double getCurrentAtr() const { return m_atr.getLastAtr(); }
-    double getCurrentDeviation() const { return m_atr.getLastAtr() * m_atrMultiplier; }
 
     //--- Основной расчёт ---
 
@@ -89,10 +77,8 @@ class CZigZagAdapt {
                    int index,
                    const double &close[],
                    const double &high[],
-                   const double &low[]) {
-
-      double atrValue = m_atr.calculate(high, low, close, index);
-      double deviation = atrValue * m_atrMultiplier;
+                   const double &low[],
+                   double deviation) {
 
       switch (m_state.search) {
         case NONE:
